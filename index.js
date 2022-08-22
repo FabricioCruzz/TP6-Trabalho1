@@ -14,8 +14,8 @@ server.post('/api/v1/classes', (req, res) => {
         res.status(404).send(`Error: ${response.message}`)
     }
     else {
-        let aulas = classDays(data.daysOfWeek, data.semester, data.year)
-        res.status(200).json(aulas)
+        let classes = classDays(data.daysOfWeek, data.semester, data.year)
+        res.status(200).json(classes)
     }
 })
 
@@ -45,71 +45,51 @@ function errorFactory(status = false, message = ''){
     return { status, message }
 }
 
-function classDays(day, semester, year){
+function classDays(daysOfWeek, semester, year){
 
-    // console.log(`${day}/${semester}/${year}`)
-    let aulas = []
+    let startSemester = ''
+    let endSemester = ''
+    let classes = []
 
-    if(semester === 1){
-        let data_inicio = `${year}-02-01`
-        let data_fim = `${year}-06-30`
-        let dtFormat = 'DD/MM'
+    if(semester == 1){
+        startSemester = `${year}-02-01`
+        endSemester = `${year}-06-30`
 
-        let data = moment(`${data_inicio}`).day(day[0])
-        
-        if(data.isBefore(data_inicio, 'month')){
-            data = moment(data).add(7, 'days')
-        }
-        aulas.push(data.format(dtFormat))           
-
-        while(true){
-
-            data = moment(data).add(7, 'days')
-            aulas.push(data.format(dtFormat))
-            
-            let diff_days = diffDays(data_fim, data)
-            if(diff_days <= 7){
-                break
-            }
-        }
+        classes = fillArray(startSemester, endSemester, daysOfWeek)
     }
     else {
-        let data_inicio = `${year}-08-01`
-        let data_fim = `${year}-11-30`
-        let dtFormat = 'DD/MM'
+        startSemester = `${year}-08-01`
+        endSemester = `${year}-11-30`
 
-        let data = moment(`${data_inicio}`).day(day[0])
-        
-        if(data.isBefore(data_inicio, 'month')){
-            data = moment(data).add(7, 'days')
+        classes = fillArray(startSemester, endSemester, daysOfWeek)
         }
-        aulas.push(data.format(dtFormat))           
 
-        while(true){
+        classes.forEach(e => {
+            console.log(`data: ${e}`)
             
-            data = moment(data).add(7, 'days')
-            aulas.push(data.format(dtFormat))
-            
-            let diff_days = diffDays(data_fim, data)
-            if(diff_days <= 7){
-                break
-            }
-        }
-    }
+        })
     
-    aulas.forEach(e => {
-        console.log(`data: ${e}`)
-        
-    })
-
-    return aulas
-    
-
+        return classes
 }
 
-function diffDays(dataFim, dataInicio){
-    let diff = moment(dataFim, 'YYYY/MM/DD').diff(moment(dataInicio, 'YYYY/MM/DD'))
-    return moment.duration(diff).asDays()
+function fillArray(startSemester, endSemester, daysOfWeek){
+    let startDate = moment(startSemester)
+    let endDate = moment(endSemester)
+    let dtFormat = 'DD/MM'
+    let classes = []
+    let startingMoment = startDate
+
+    while(startingMoment <= endDate){
+        let dayOfWeek = startingMoment.day()
+        daysOfWeek.forEach(e => {
+            if(e === dayOfWeek){
+                classes.push(startingMoment.clone().format(dtFormat))
+            }
+        })
+        startingMoment.add(1, 'days')
+    }
+
+    return classes
 }
 
 server.listen(port, () => {
