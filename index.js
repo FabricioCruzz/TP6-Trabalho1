@@ -33,11 +33,20 @@ function validateData(data){
     return errorFactory(true, 'Semester invalid')
    }
 
-   if(data.daysOfWeek.length === 0 || data.daysOfWeek.length > 5){
+   if(data.daysOfWeek.length === 0 || data.daysOfWeek.length > 5 || verifyDaysOfWeek(data.daysOfWeek)){
     return errorFactory(true, 'Days of week is invalid')
    }
     
     return errorFactory()
+}
+
+function verifyDaysOfWeek(days){
+    for (let i = 1; i < 6; i++) {
+        if(days[i] < 1 || days[i] > 5){
+            return true
+        }
+    }
+    return false
 }
 
 function errorFactory(status = false, message = ''){
