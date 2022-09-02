@@ -1,11 +1,15 @@
 const express = require('express')
 const moment = require('moment')
-const server = express()
-const port = 8087
+const app = express()
+const PORT = 8087
 
-server.use(express.json())
+app.use(express.json())
 
-server.post('/api/v1/classes', (req, res) => {
+app.get('/', (_req, res) => {
+    res.send('Hello World!')
+})
+
+app.post('/api/v1/classes', (req, res) => {
     const data = req.body
     
     const response = validateData(data)
@@ -101,7 +105,7 @@ function fillArray(startSemester, endSemester, daysOfWeek){
     return classes
 }
 
-server.listen(port, () => {
-    console.log(`server listening port ${port}`)
+app.listen(PORT, () => {
+    console.log(`server listening port ${PORT}`)
     
 })
