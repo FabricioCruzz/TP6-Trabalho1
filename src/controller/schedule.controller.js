@@ -1,27 +1,26 @@
-const express = require('express')
+const service = require('../service/schedule.service')
 const moment = require('moment')
-const app = express()
-const PORT = 8087
 
-app.use(express.json())
 
-app.get('/', (_req, res) => {
-    res.send('Hello World!')
-})
+const getAll = (_req, res) => {
+    res.send(service.getAll())
+}
 
-app.post('/api/v1/classes', (req, res) => {
+const create = (req, res) => {
     const data = req.body
-    
+
     const response = validateData(data)
 
     if(response.status) {
         res.status(404).send(`Error: ${response.message}`)
     }
     else {
-        let classes = classDays(data.daysOfWeek, data.semester, data.year)
-        res.status(200).json(classes)
+        let schedule = classDays(data.daysOfWeek, data.semester, data.year)
+        service.create(schedule)
+        res.status(200).send(service.getAll())
     }
-})
+
+}
 
 function validateData(data){
     
@@ -62,50 +61,50 @@ function classDays(daysOfWeek, semester, year){
 
     let startSemester = ''
     let endSemester = ''
-    let classes = []
+    let schedule = []
 
     if(semester == 1){
         startSemester = `${year}-02-01`
         endSemester = `${year}-06-30`
 
-        classes = fillArray(startSemester, endSemester, daysOfWeek)
+        schedule = fillArray(startSemester, endSemester, daysOfWeek)
     }
     else {
         startSemester = `${year}-08-01`
         endSemester = `${year}-11-30`
 
-        classes = fillArray(startSemester, endSemester, daysOfWeek)
+        schedule = fillArray(startSemester, endSemester, daysOfWeek)
         }
 
-        classes.forEach(e => {
+        schedule.forEach(e => {
             console.log(`data: ${e}`)
             
         })
     
-        return classes
+        return schedule
 }
 
 function fillArray(startSemester, endSemester, daysOfWeek){
     let startDate = moment(startSemester)
     let endDate = moment(endSemester)
     let dtFormat = 'DD/MM'
-    let classes = []
+    let schedule = []
     let startingMoment = startDate
 
     while(startingMoment <= endDate){
         let dayOfWeek = startingMoment.day()
         daysOfWeek.forEach(e => {
             if(e === dayOfWeek){
-                classes.push(startingMoment.clone().format(dtFormat))
+                schedule.push(startingMoment.clone().format(dtFormat))
             }
         })
         startingMoment.add(1, 'days')
     }
 
-    return classes
+    return schedule
 }
 
-app.listen(PORT, () => {
-    console.log(`server listening port ${PORT}`)
-    
-})
+module.exports = {
+    getAll,
+    create
+}
